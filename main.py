@@ -93,7 +93,7 @@ while run:
         bullet_state=False
 
     #collison detection
-    if EnemyPos[0]<BulletPos[0]+16<EnemyPos[0]+64 and EnemyPos[1]+64==BulletPos[1]:
+    if EnemyPos[0]-5<BulletPos[0]+16<EnemyPos[0]+69 and EnemyPos[1]+59<BulletPos[1]<EnemyPos[1]+69:
         BulletPos[1]=-64
         EnemyPos[0], EnemyPos[1] = random.randint(0,res[0]-32), random.randint(0, res[1]/2-32)
 
