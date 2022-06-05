@@ -76,6 +76,8 @@ run=True
 menu=True
 play=False 
 settings = False
+
+res_change, FPS_change = False, False
 while run:
     dt = clock.tick(FPS)
     
@@ -101,13 +103,8 @@ while run:
     if settings:
         screen.fill((150,150,150))
         
-        
-        
         screen.blit(resolution_img, [res[0]/5-130, res[1]*1/15])
         screen.blit(FPS_img, [res[0]*4/5-50, res[1]*1/15])
-        #screen.blit(PlayerImg, PlayerPos)
-        #screen.blit(PlayerImg, PlayerPos)
-        #screen.blit(PlayerImg, PlayerPos)
 
         if res_1920x1080_button.draw(screen):
             new_res=[1920,1080]
@@ -124,22 +121,19 @@ while run:
         if fps_144_button.draw(screen):
             new_FPS=144
             FPS_change=True
-
+        
         if restart_button.draw(screen):
+            
             if not res_change:
                 new_res = res
             if not FPS_change:
-                new_fps = FPS
+                new_FPS = FPS
             
             with open("./settings.settings", "w") as settings_file:
                 settings_file.write(str(full)+"\n"+str(new_res[0])+","+str(new_res[1])+"\n"+str(new_FPS))
             pygame.quit()
             os.system("python main.py")
 
-        
-        
-        
-        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
