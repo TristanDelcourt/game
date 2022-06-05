@@ -1,23 +1,47 @@
 import random
 import pygame
 import classes
+import os
 pygame.init()
 
-full = pygame.FULLSCREEN
-win=0
-res=[1280,720]
-FPS = 120
+with open("./settings.settings", "r") as settings:
+    lines = settings.readlines()
+
+if lines[0][0] == "1":
+    full = pygame.FULLSCREEN
+else:
+    full = 0
+res = [int(lines[1].split(",")[0]),int(lines[1].split(",")[1])]
+FPS = int(lines[2])
+
 
 start_img = pygame.image.load('./assets/start_btn.png')
-exit_img = pygame.image.load('./assets/settings_btn.png')
+settings_img = pygame.image.load('./assets/settings_btn.png')
+resolution_img = pygame.image.load('./assets/resolution.png')
+FPS_img = pygame.image.load('./assets/FPS.png')
+restart_img = pygame.image.load('./assets/restart_btn.png')
+
+res_1920x1080 = pygame.image.load('./assets/resolutions/1920x1080.png')
+res_1280x720 = pygame.image.load('./assets/resolutions/1280x720.png')
+
+fps_60 = pygame.image.load('./assets/framerates/60.png')
+fps_120 = pygame.image.load('./assets/framerates/120.png')
+fps_144 = pygame.image.load('./assets/framerates/144.png')
 
 
 start_button = classes.Button(res[0]/2-54, res[1]/2-24, start_img, 1)
-settings_button = classes.Button(res[0]-26, 0, exit_img, 0.05)
+settings_button = classes.Button(res[0]-26, 0, settings_img, 0.05)
+restart_button = classes.Button(res[0]/2-99, res[1]-70, restart_img, 1)
 
+res_1920x1080_button = classes.Button(res[0]*1/5-148, res[1]/2-80 , res_1920x1080, 1)
+res_1280_720_button = classes.Button(res[0]*1/5-135, res[1]/2, res_1280x720, 1)
+
+fps_60_button = classes.Button(res[0]*4/5-30, res[1]/2-80, fps_60, 1)
+fps_120_button = classes.Button(res[0]*4/5-40, res[1]/2-30, fps_120, 1)
+fps_144_button = classes.Button(res[0]*4/5-44, res[1]/2+20, fps_144, 1)
 
 clock = pygame.time.Clock()
-screen = pygame.display.set_mode(res,win)
+screen = pygame.display.set_mode(res, full)
 pygame.display.set_caption("My game")
 icon = pygame.image.load("icon.png")
 pygame.display.set_icon(icon)
@@ -59,20 +83,71 @@ while run:
     
     if menu:
         screen.fill((150,150,150))
+        
+        
+        
         if start_button.draw(screen):
             play=True
             menu=False
         if settings_button.draw(screen):
-            settintgs=True
+            settings=True
             menu=False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
     
     ##########################################################################
-                
+    
+    if settings:
+        screen.fill((150,150,150))
+        
+        
+        
+        screen.blit(resolution_img, [res[0]/5-130, res[1]*1/15])
+        screen.blit(FPS_img, [res[0]*4/5-50, res[1]*1/15])
+        #screen.blit(PlayerImg, PlayerPos)
+        #screen.blit(PlayerImg, PlayerPos)
+        #screen.blit(PlayerImg, PlayerPos)
+
+        if res_1920x1080_button.draw(screen):
+            new_res=[1920,1080]
+            res_change=True
+        if res_1280_720_button.draw(screen):
+            new_res=[1280,720]
+            res_change=True
+        if fps_60_button.draw(screen):
+            new_FPS=60
+            FPS_change=True
+        if fps_120_button.draw(screen):
+            new_FPS=120
+            FPS_change=True
+        if fps_144_button.draw(screen):
+            new_FPS=144
+            FPS_change=True
+
+        if restart_button.draw(screen):
+            if not res_change:
+                new_res = res
+            if not FPS_change:
+                new_fps = FPS
+            
+            with open("./settings.settings", "w") as settings_file:
+                settings_file.write(str(full)+"\n"+str(new_res[0])+","+str(new_res[1])+"\n"+str(new_FPS))
+            pygame.quit()
+            os.system("python main.py")
+
+        
+        
+        
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+    
+    
     if play:
         screen.fill((150,150,150))
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run=False
