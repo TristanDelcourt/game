@@ -2,6 +2,8 @@ import random
 import pygame
 import classes
 import os
+import chunk_render
+from map_layout import chunks
 pygame.init()
 
 with open("./settings.settings", "r") as settings:
@@ -55,31 +57,22 @@ PlayerImg=pygame.image.load("./assets/player.png")
 PlayerPos=[res[0]/2-32,4/5*res[1]-32]
 player_left, player_right, player_up, player_down = False, False, False, False
 
-#Enemy parameters
-EnemyImg=pygame.image.load("./assets/enemy.png")
-EnemyPos=[0,0]
-
-#Bullets parameters
-BulletImg=pygame.image.load("./assets/bullet.png")
-BulletPos=[0,0]
-bullet_Yvar=-1
-bullet_state=False
+#Chunks loading
+assets = chunk_render.initate_assets(res)
+wall = assets[223]
+grass = assets[177]
+tiles = {"#": wall, ".": grass}
+x, y = 0, 0
+xmax, ymax = len(chunks[0])-1, len(chunks[1])-1
 
 def player(PlayerPos):
     screen.blit(PlayerImg, PlayerPos)
 
-def enemy(EnemyPos):
-    screen.blit(EnemyImg,EnemyPos)
-
-def bullet_fire(PlayerPos):
-    global bullet_state
-    bullet_state=True
-    screen.blit(BulletImg,[PlayerPos[0]+16,PlayerPos[1]])
-    
 run=True
 menu=True
 play=False 
 settings = False
+
 
 res_change, FPS_change = False, False
 while run:
@@ -143,8 +136,10 @@ while run:
     
     
     if play:
-        screen.blit(bg_img,(0,0))
-
+        
+        current_chunk = [x,y]
+        print(current_chunk)
+        chunk_render.render_chunk(current_chunk, res, screen, tiles)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -182,37 +177,36 @@ while run:
             PlayerPos[1]+=0.3*dt
         
         #Player constraints
-        if PlayerPos[0]<0:
-            PlayerPos[0]=0
-        elif PlayerPos[0]>res[0]-64:
-            PlayerPos[0]=res[0]-64
-        if PlayerPos[1]<res[1]*3/4:
-            PlayerPos[1]=res[1]*3/4
-        elif PlayerPos[1]>res[1]-64:
-            PlayerPos[1]=res[1]-64
-        
-        #Enemy mouvement
-        if EnemyPos[0]<=0:
-            EnemyPos[1]+=20
-            enemy_Xvar=0.2*dt
-        elif EnemyPos[0]>=res[0]-64:
-            EnemyPos[1]+=20
-            enemy_Xvar=-0.2*dt
-        EnemyPos[0]+=enemy_Xvar
-        
-        #Bullet movement
-        if bullet_state==True:
-            bullet_fire(BulletPos)
-            BulletPos[1]+=bullet_Yvar*dt
-        if BulletPos[1]<0:
-            bullet_state=False
-        #collison detection
-        if EnemyPos[0]-5<BulletPos[0]+16<EnemyPos[0]+69 and EnemyPos[1]+59<BulletPos[1]<EnemyPos[1]+69:
-            BulletPos[1]=-64
-            EnemyPos=[random.randint(0,res[0]-32),random.randint(0, res[1]/2-32)]
+        current = chunks[current_chunk[0]][current_chunk[1]]
 
+        if PlayerPos[0]<0:
+            if current[round(PlayerPos[1]*9/res[1])][0] =='#':
+                PlayerPos[0]=80
+            elif x>0:
+                x-=1
+                PlayerPos[0]=res[0]-64
+        elif PlayerPos[0]>res[0]-64:
+            if current[round(PlayerPos[1]*9/res[1])][-1] =='#':
+                PlayerPos[0]=res[0]-144
+            elif x<xmax:
+                x+=1
+                PlayerPos[0]=0
+        elif PlayerPos[1]<0:
+            if current[0][round(PlayerPos[0]*16/res[0])] == "#":
+                PlayerPos[1]=64
+            elif y>0:
+                y-=1
+                PlayerPos[1]=res[1]-80
+        elif PlayerPos[1]>res[1]-64:
+            print(PlayerPos[1]*16/res[1])
+            if current[-1][round(PlayerPos[0]*16/res[0])] =='#':
+                PlayerPos[1]=res[1]-144
+            elif y<ymax:
+                y+=1
+                PlayerPos[1]=0
+            print(current_chunk)
+        
         player(PlayerPos)
-        enemy(EnemyPos)
         
     ##########################################################################
         
