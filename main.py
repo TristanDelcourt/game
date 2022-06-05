@@ -46,6 +46,10 @@ pygame.display.set_caption("My game")
 icon = pygame.image.load("icon.png")
 pygame.display.set_icon(icon)
 
+#background
+bg_img = pygame.image.load('./assets/background.png')
+bg_img = pygame.transform.scale(bg_img,res)
+
 #Player parameters
 PlayerImg=pygame.image.load("./assets/player.png")
 PlayerPos=[res[0]/2-32,4/5*res[1]-32]
@@ -84,9 +88,7 @@ while run:
     ##########################################################################
     
     if menu:
-        screen.fill((150,150,150))
-        
-        
+        screen.blit(bg_img,(0,0))
         
         if start_button.draw(screen):
             play=True
@@ -101,7 +103,8 @@ while run:
     ##########################################################################
     
     if settings:
-        screen.fill((150,150,150))
+        screen.blit(bg_img,(0,0))
+
         
         screen.blit(resolution_img, [res[0]/5-130, res[1]*1/15])
         screen.blit(FPS_img, [res[0]*4/5-50, res[1]*1/15])
@@ -140,7 +143,8 @@ while run:
     
     
     if play:
-        screen.fill((150,150,150))
+        screen.blit(bg_img,(0,0))
+
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
