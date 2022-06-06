@@ -44,6 +44,5 @@ def render_chunk(chunks , current_chunk, res, screen, tiles):
         for column in range(16):
             tile = current[line][column]
             screen.blit(tiles[tile], (column * res[0]*1/16, line * res[0]*1/16))
-    return True
 
 get_map()
