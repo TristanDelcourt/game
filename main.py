@@ -1,46 +1,47 @@
 import random
 import pygame
-import classes
+from classes import *
 import os
 import chunk_render
-import random
 pygame.init()
+
+
 
 with open("./settings.settings", "r") as settings:
     lines = settings.readlines()
 
 if lines[0][0] == "1":
+    full_on = 1
     full = pygame.FULLSCREEN
 else:
+    full_on = 0
     full = 0
 res = [int(lines[1].split(",")[0]),int(lines[1].split(",")[1])]
 FPS = int(lines[2])
 
+def draw_text(text, size, color, font, x, y):
+    font = pygame.font.Font(font, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect(center=(x, y))
+    screen.blit(text_surface, text_rect)
 
-start_img = pygame.image.load('./assets/start_btn.png')
+
+#image buttons
 settings_img = pygame.image.load('./assets/settings_btn.png')
-resolution_img = pygame.image.load('./assets/resolution.png')
-FPS_img = pygame.image.load('./assets/FPS.png')
-restart_img = pygame.image.load('./assets/restart_btn.png')
+settings_button = Button(res[0]-26, 0, settings_img, 0.05)
 
-res_1920x1080 = pygame.image.load('./assets/resolutions/1920x1080.png')
-res_1280x720 = pygame.image.load('./assets/resolutions/1280x720.png')
+#text buttons
+start_button = text_Button("PLAY", int(res[0]/16), (99,171,63,255), "Minecraft.ttf", res[0]/2,res[1]/2)
+restart_button = text_Button("Restart", int(res[1]/16), (99,171,63,255) ,"Minecraft.ttf", res[0]/2, res[1]*5/6)
+full_button = text_Button("Full: O", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]/5, res[1]*5/6)
+menu_button = text_Button("MENU", int(res[0]/64), (99,171,63,255) ,"Minecraft.ttf", res[0]/40, res[1]/40)
 
-fps_60 = pygame.image.load('./assets/framerates/60.png')
-fps_120 = pygame.image.load('./assets/framerates/120.png')
-fps_144 = pygame.image.load('./assets/framerates/144.png')
+res_1920x1080_button = text_Button("1920x1080", int(res[0]*5/128), (99,171,63,255),"Minecraft.ttf", res[0]*1/5, res[1]/2-res[1]/18)
+res_1280x720_button = text_Button("1280x720", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]*1/5, res[1]/2+res[1]/18)
 
-
-start_button = classes.Button(res[0]/2-54, res[1]/2-24, start_img, 1)
-settings_button = classes.Button(res[0]-26, 0, settings_img, 0.05)
-restart_button = classes.Button(res[0]/2-99, res[1]-70, restart_img, 1)
-
-res_1920x1080_button = classes.Button(res[0]*1/5-148, res[1]/2-80 , res_1920x1080, 1)
-res_1280_720_button = classes.Button(res[0]*1/5-135, res[1]/2, res_1280x720, 1)
-
-fps_60_button = classes.Button(res[0]*4/5-30, res[1]/2-80, fps_60, 1)
-fps_120_button = classes.Button(res[0]*4/5-40, res[1]/2-30, fps_120, 1)
-fps_144_button = classes.Button(res[0]*4/5-44, res[1]/2+20, fps_144, 1)
+fps_60_button = text_Button("60", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]*4/5, res[1]/2-res[1]/9)
+fps_120_button = text_Button("120", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]*4/5, res[1]/2)
+fps_144_button = text_Button("144", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]*4/5, res[1]/2+res[1]/9)
 
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(res, full)
@@ -49,10 +50,9 @@ icon = pygame.image.load("./assets/icon.png")
 pygame.display.set_icon(icon)
 
 #background
-bg_img = pygame.image.load('./assets/background.png')
-bg_img = pygame.transform.scale(bg_img,res)
+bg_img = pygame.transform.scale(pygame.image.load('./assets/background.png'),res)
 
-#Player parameters
+#Player psetup
 player_front=pygame.transform.scale(pygame.image.load("./assets/player/player_front.png"),[res[0]/16,res[1]/9])
 player_back=pygame.transform.scale(pygame.image.load("./assets/player/player_back.png"),[res[0]/16,res[1]/9])
 playerImg=player_front
@@ -72,21 +72,25 @@ tiles = {"#": wall, ".": grass, "1": flower_1, "2": flower_2, "3": flower_3, "4"
 x, y = 0, 0
 xmax, ymax = len(chunks)-1, len(chunks[1])-1
 
-run=True
-menu=True
-play=False 
-settings = False
 
+menu, run = True, True
 
-res_change, FPS_change = False, False
+settings, play, res_change, FPS_change , full_change = False, False, False, False, False
 while run:
     dt = clock.tick(FPS)
+    
+    
     
     ##########################################################################
     
     if menu:
+        
         screen.blit(bg_img,(0,0))
         
+        if menu_button.draw(screen):
+            settings, play, = False, False
+            menu = True
+            
         if start_button.draw(screen):
             play=True
             menu=False
@@ -102,14 +106,28 @@ while run:
     if settings:
         screen.blit(bg_img,(0,0))
 
+        if menu_button.draw(screen):
+            settings, play, = False, False
+            menu = True
         
-        screen.blit(resolution_img, [res[0]/5-130, res[1]*1/15])
-        screen.blit(FPS_img, [res[0]*4/5-50, res[1]*1/15])
+        draw_text("Resolutions", int(res[0]*5/128) , (99,171,63,255), "Minecraft.ttf" , res[0]/5, res[1]/15+res[1]*80/720)
+        draw_text("FPS", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]*4/5, res[1]/15+res[1]*80/720)
+        
+        if full_button.draw(screen):
+            full_on+=1
+            if full_on%2==0:
+                new_full=0
+                full_change=False
+            else:
+                new_full=1
+                full_change=True
+        if full_on%2!=0:
+            draw_text("X", int(res[0]*5/128), (99,171,63,255), "Minecraft.ttf", res[0]/5+res[0]*11/256, res[1]*5/6)
 
         if res_1920x1080_button.draw(screen):
             new_res=[1920,1080]
             res_change=True
-        if res_1280_720_button.draw(screen):
+        if res_1280x720_button.draw(screen):
             new_res=[1280,720]
             res_change=True
         if fps_60_button.draw(screen):
@@ -128,9 +146,11 @@ while run:
                 new_res = res
             if not FPS_change:
                 new_FPS = FPS
+            if not full_change:
+                new_full = full
             
             with open("./settings.settings", "w") as settings_file:
-                settings_file.write(str(full)+"\n"+str(new_res[0])+","+str(new_res[1])+"\n"+str(new_FPS))
+                settings_file.write(str(new_full)+"\n"+str(new_res[0])+","+str(new_res[1])+"\n"+str(new_FPS))
             pygame.quit()
             os.system("python main.py")
 
@@ -138,12 +158,17 @@ while run:
             if event.type == pygame.QUIT:
                 run = False
     
+    ##########################################################################
     
     if play:
         
         current_chunk = [x,y]
         chunk_render.render_chunk(chunks, current_chunk, res, screen, tiles)
         
+        if menu_button.draw(screen):
+            settings, play, = False, False
+            menu = True
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run=False
