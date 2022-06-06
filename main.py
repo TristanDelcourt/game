@@ -1,8 +1,8 @@
+import chunk_render
 import random
 import pygame
 from classes import *
 import os
-import chunk_render
 pygame.init()
 
 
@@ -56,8 +56,10 @@ bg_img = pygame.transform.scale(pygame.image.load('./assets/background.png'),res
 player_front=pygame.transform.scale(pygame.image.load("./assets/player/player_front.png"),[res[0]/16,res[1]/9])
 player_back=pygame.transform.scale(pygame.image.load("./assets/player/player_back.png"),[res[0]/16,res[1]/9])
 playerImg=player_front
-PlayerPos=[res[0]/2-32,4/5*res[1]-32]
+PlayerPos=[res[0]/2,4/5*res[1]]
 player_left, player_right, player_up, player_down = False, False, False, False
+obstacles = ["#"]
+player=Player(playerImg, PlayerPos[0], PlayerPos[1], obstacles, res)
 
 #Chunks loading
 chunks = chunk_render.get_map()
@@ -163,76 +165,34 @@ while run:
     if play:
         
         current_chunk = [x,y]
+        current = chunks[current_chunk[0]][current_chunk[1]]
         chunk_render.render_chunk(chunks, current_chunk, res, screen, tiles)
         
         if menu_button.draw(screen):
             settings, play, = False, False
             menu = True
-
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run=False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    player_left=True
-                if event.key == pygame.K_d:
-                    player_right=True
-                if event.key == pygame.K_z:
-                    playerImg=player_back
-                    player_down=True
-                if event.key == pygame.K_s:
-                    playerImg=player_front
-                    player_up=True
-
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_q or pygame.K_d:
-                    player_left=False
-                if event.key == pygame.K_d:
-                    player_right=False
-                if event.key == pygame.K_z:
-                    player_down=False
-                if event.key == pygame.K_s:
-                    player_up=False
-
-        #Player movement    
-        if player_left:
-            PlayerPos[0]-=0.3*dt
-        if player_right:
-            PlayerPos[0]+=0.3*dt
-        if player_down:
-            PlayerPos[1]-=0.3*dt
-        if player_up:
-            PlayerPos[1]+=0.3*dt
         
-        #Player constraints
-        current = chunks[current_chunk[0]][current_chunk[1]]
-
-        if PlayerPos[0]<0:
-            if current[round(PlayerPos[1]*9/res[1])][0] =='#':
-                PlayerPos[0]=80
-            elif x>0:
+        key = pygame.key.get_pressed()
+        if key[pygame.K_q]:
+            if Player.move(player, -0.3*dt, 0, current) == "left":
                 x-=1
-                PlayerPos[0]=res[0]-64
-        elif PlayerPos[0]>res[0]-64:
-            if current[round(PlayerPos[1]*9/res[1])][-1] =='#':
-                PlayerPos[0]=res[0]-144
-            elif x<xmax:
+        if key[pygame.K_d]:
+            if Player.move(player, 0.3*dt, 0, current) == "right":
                 x+=1
-                PlayerPos[0]=0
-        elif PlayerPos[1]<0:
-            if current[0][round(PlayerPos[0]*16/res[0])] == "#":
-                PlayerPos[1]=64
-            elif y>0:
-                y-=1
-                PlayerPos[1]=res[1]-64
-        elif PlayerPos[1]>res[1]-64:
-            if current[-1][round(PlayerPos[0]*16/res[0])] =='#':
-                PlayerPos[1]=res[1]-144
-            elif y<ymax:
+        if key[pygame.K_z]:
+            playerImg=player_back
+            if Player.move(player, 0, -0.3*dt, current) == "up":
                 y+=1
-                PlayerPos[1]=0
-        
-        screen.blit(playerImg, PlayerPos)
+        if key[pygame.K_s]:
+            playerImg=player_front
+            if Player.move(player, 0, 0.3*dt, current) == "down":
+                y-=1
+    
+        screen.blit(playerImg, player.rect)
         
     ##########################################################################
         

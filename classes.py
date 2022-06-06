@@ -46,3 +46,61 @@ class text_Button():
 		surface.blit(self.text_surface, (self.rect.x, self.rect.y))
 
 		return action
+
+class Player():
+	def __init__(self, playerImg, x, y, obstacles, res):
+		self.obstacles = obstacles
+		self.res = res
+		self.image = pygame.transform.scale(playerImg, [int(res[0]/16), int(res[1]/9)])
+		self.rect = self.image.get_rect(center=(x, y))
+
+	def move(self, dx, dy, current_chunk):
+
+		# Move each axis separately. Note that this checks for collisions both times.
+		if dx != 0:
+			return self.move_single_axis(dx, 0, current_chunk)
+
+		if dy != 0:
+			return self.move_single_axis(0, dy, current_chunk)
+		
+		
+
+ 
+	def move_single_axis(self, dx, dy, current_chunk):
+
+		# Move the rect
+		self.rect.x += dx
+		self.rect.y += dy
+
+  
+		# If you collide with a wall, move out based on velocity
+		for lines in range(9):
+			for column in range(16):
+				if current_chunk[lines][column] in self.obstacles:
+					current_tile = pygame.Rect(column * self.res[0]/16, lines * self.res[1]/9, self.res[0]/16, self.res[1]/9)
+					if self.rect.colliderect(current_tile):
+						if dx > 0: # Moving right; Hit the left side of the wall
+						    self.rect.right = current_tile.left
+						if dx < 0: # Moving left; Hit the right side of the wall
+						    self.rect.left = current_tile.right
+						if dy > 0: # Moving down; Hit the top side of the wall
+						    self.rect.bottom = current_tile.top
+						if dy < 0: # Moving up; Hit the bottom side of the wall
+						    self.rect.top = current_tile.bottom
+		
+		if self.rect.x+7>self.res[0]:
+			self.rect.x=100
+			print("right")
+			return "right"
+		elif self.rect.x<-7:
+			self.rect.x=self.res[0]-100
+			print("left")
+			return "left"
+		if self.rect.y+7>self.res[1]:
+			self.rect.y=100
+			print("down")
+			return "down"
+		elif self.rect.y<-7:
+			self.rect.y=self.res[1]-175
+			print("up")
+			return "up"
