@@ -3,7 +3,7 @@ import pygame
 import classes
 import os
 import chunk_render
-from map_layout import chunks
+import random
 pygame.init()
 
 with open("./settings.settings", "r") as settings:
@@ -45,7 +45,7 @@ fps_144_button = classes.Button(res[0]*4/5-44, res[1]/2+20, fps_144, 1)
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(res, full)
 pygame.display.set_caption("My game")
-icon = pygame.image.load("icon.png")
+icon = pygame.image.load("./assets/icon.png")
 pygame.display.set_icon(icon)
 
 #background
@@ -53,20 +53,24 @@ bg_img = pygame.image.load('./assets/background.png')
 bg_img = pygame.transform.scale(bg_img,res)
 
 #Player parameters
-PlayerImg=pygame.image.load("./assets/player.png")
+player_front=pygame.transform.scale(pygame.image.load("./assets/player/player_front.png"),[res[0]/16,res[1]/9])
+player_back=pygame.transform.scale(pygame.image.load("./assets/player/player_back.png"),[res[0]/16,res[1]/9])
+playerImg=player_front
 PlayerPos=[res[0]/2-32,4/5*res[1]-32]
 player_left, player_right, player_up, player_down = False, False, False, False
 
 #Chunks loading
+chunks = chunk_render.get_map()
 assets = chunk_render.initate_assets(res)
 wall = assets[223]
 grass = assets[177]
-tiles = {"#": wall, ".": grass}
+flower_1 = assets[250]
+flower_2 = assets[251]
+flower_3 = assets[252]
+flower_4 = assets[253]
+tiles = {"#": wall, ".": grass, "1": flower_1, "2": flower_2, "3": flower_3, "4": flower_4}
 x, y = 0, 0
-xmax, ymax = len(chunks[0])-1, len(chunks[1])-1
-
-def player(PlayerPos):
-    screen.blit(PlayerImg, PlayerPos)
+xmax, ymax = len(chunks)-1, len(chunks[1])-1
 
 run=True
 menu=True
@@ -138,8 +142,7 @@ while run:
     if play:
         
         current_chunk = [x,y]
-        print(current_chunk)
-        chunk_render.render_chunk(current_chunk, res, screen, tiles)
+        chunk_render.render_chunk(chunks, current_chunk, res, screen, tiles)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -150,12 +153,12 @@ while run:
                 if event.key == pygame.K_d:
                     player_right=True
                 if event.key == pygame.K_z:
+                    playerImg=player_back
                     player_down=True
                 if event.key == pygame.K_s:
+                    playerImg=player_front
                     player_up=True
-                if event.key == pygame.K_SPACE and bullet_state==False:
-                    BulletPos[0], BulletPos[1]=PlayerPos[0], PlayerPos[1]
-                    bullet_fire(BulletPos)
+
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_q or pygame.K_d:
                     player_left=False
@@ -196,17 +199,15 @@ while run:
                 PlayerPos[1]=64
             elif y>0:
                 y-=1
-                PlayerPos[1]=res[1]-80
+                PlayerPos[1]=res[1]-64
         elif PlayerPos[1]>res[1]-64:
-            print(PlayerPos[1]*16/res[1])
             if current[-1][round(PlayerPos[0]*16/res[0])] =='#':
                 PlayerPos[1]=res[1]-144
             elif y<ymax:
                 y+=1
                 PlayerPos[1]=0
-            print(current_chunk)
         
-        player(PlayerPos)
+        screen.blit(playerImg, PlayerPos)
         
     ##########################################################################
         
