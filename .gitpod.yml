@@ -6,4 +6,4 @@ ports:
     onOpen: open-preview
 tasks:
   - init: pip3 install -r /workspace/game/requirements.txt
-    command: python3 hangman.py
+    command: python3 main.py
