@@ -53,6 +53,7 @@ class Player():
 		self.res = res
 		self.image = pygame.transform.scale(playerImg, [int(res[0]/16), int(res[1]/9)])
 		self.rect = self.image.get_rect(center=(x, y))
+		self.side = self.image.get_width()
 
 	def move(self, dx, dy, current_chunk):
 
@@ -88,19 +89,15 @@ class Player():
 						if dy < 0: # Moving up; Hit the bottom side of the wall
 						    self.rect.top = current_tile.bottom
 		
-		if self.rect.x+7>self.res[0]:
-			self.rect.x=100
-			print("right")
+		if self.rect.x + self.side>self.res[0]:
+			self.rect.x=10
 			return "right"
-		elif self.rect.x<-7:
-			self.rect.x=self.res[0]-100
-			print("left")
+		elif self.rect.x<0:
+			self.rect.x=self.res[0] - self.side -10
 			return "left"
-		if self.rect.y+7>self.res[1]:
+		if self.rect.y + self.side>self.res[1]:
 			self.rect.y=100
-			print("down")
 			return "down"
-		elif self.rect.y<-7:
-			self.rect.y=self.res[1]-175
-			print("up")
+		elif self.rect.y<0:
+			self.rect.y=self.res[1]- self.side -10
 			return "up"
