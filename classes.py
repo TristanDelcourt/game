@@ -96,7 +96,7 @@ class Player():
 			self.rect.x=self.res[0] - self.side -10
 			return "left"
 		if self.rect.y + self.side>self.res[1]:
-			self.rect.y=100
+			self.rect.y=5
 			return "down"
 		elif self.rect.y<0:
 			self.rect.y=self.res[1]- self.side -10
